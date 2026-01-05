@@ -1,73 +1,107 @@
-# Welcome to your Lovable project
+# 🍌 Ripeness Detector 3000
 
-## Project info
+A modern web application that uses Roboflow's object detection API to analyze banana ripeness from uploaded images.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Image Upload**: Drag & drop or click to upload banana images
+- **Object Detection**: Uses Roboflow's serverless inference API
+- **Visual Results**: Bounding boxes overlaid on the image with class labels
+- **Confidence Filtering**: Adjustable threshold slider to filter predictions
+- **Results Table**: Sorted list of detections with confidence scores
+- **Raw JSON**: Expandable panel showing the complete API response
 
-There are several ways of editing your application.
+## Setup
 
-**Use Lovable**
+### 1. Configure the Roboflow API Key
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+The app requires a Roboflow API key to function. The key is stored securely as a backend secret.
 
-Changes made via Lovable will be committed automatically to this repo.
+**In Lovable:**
+1. Open your project settings
+2. Navigate to **Cloud** → **Secrets**
+3. Add a secret named `ROBOFLOW_API_KEY`
+4. Enter your Roboflow API key as the value
 
-**Use your preferred IDE**
+You can get your API key from [Roboflow Settings](https://app.roboflow.com/settings/api).
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 2. Model Configuration
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The default model is `ripeness-detection_1/1`. You can change this in the UI's "Model ID" field to use any Roboflow model you have access to.
 
-Follow these steps:
+Model ID format: `project-name/version-number`
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Architecture
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Frontend (React + Vite)
+- Modern React with TypeScript
+- Tailwind CSS for styling
+- shadcn/ui components
+- Canvas API for drawing bounding boxes
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Backend (Edge Function)
+- Serverless edge function at `/functions/v1/infer`
+- Securely stores and uses the Roboflow API key
+- Proxies requests to Roboflow's serverless API
+- Returns JSON responses to the frontend
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## API Reference
+
+### POST /functions/v1/infer
+
+Request body:
+```json
+{
+  "image": "<base64-encoded-image>",
+  "model_id": "ripeness-detection_1/1",
+  "confidence": 0.25,
+  "overlap": 0.5
+}
 ```
 
-**Edit a file directly in GitHub**
+Response:
+```json
+{
+  "predictions": [
+    {
+      "x": 150,
+      "y": 200,
+      "width": 100,
+      "height": 80,
+      "class": "ripe",
+      "confidence": 0.95
+    }
+  ],
+  "image": { "width": 640, "height": 480 }
+}
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Deployment
 
-**Use GitHub Codespaces**
+The app is automatically deployed when you click **Publish** in Lovable. Both the frontend and the edge function are deployed together.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Troubleshooting
 
-## What technologies are used for this project?
+### 403 Error from Roboflow
+- Verify your API key is correct
+- Check that you have access to the specified model
+- Ensure the model ID format is correct (project/version)
 
-This project is built with:
+### No Predictions Returned
+- Try lowering the confidence threshold
+- Ensure the image contains bananas
+- Check that the model is trained for banana detection
 
-- Vite
+### Connection Errors
+- Verify your internet connection
+- Check that the Lovable Cloud backend is running
+- Look at the browser console for detailed errors
+
+## Technologies Used
+
+- React 18 + Vite
 - TypeScript
-- React
-- shadcn-ui
 - Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- shadcn/ui
+- Lovable Cloud
+- Roboflow Serverless Inference API
