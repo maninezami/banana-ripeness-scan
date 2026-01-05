@@ -1,1 +1,4 @@
 project_id = "xhedcktvxwaxfdnlrlnw"
+
+[functions.infer]
+verify_jwt = false
